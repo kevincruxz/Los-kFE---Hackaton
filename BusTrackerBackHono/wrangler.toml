@@ -1,0 +1,8 @@
+name = "api-hono"
+main = "src/index.js"
+compatibility_date = "2025-11-04"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "utc_bus_tracker"
+database_id = "f4531249-ef18-48b1-a04e-c4f77c597b77"
