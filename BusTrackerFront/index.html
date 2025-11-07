@@ -135,6 +135,8 @@
     };
 
     async function initializeApp() {
+      try {
+        if (window.elementSdk && typeof window.elementSdk.init === 'function') {
       await window.elementSdk.init({
         defaultConfig,
         onConfigChange: async (config) => {
@@ -256,7 +258,16 @@
       });
 
       renderCurrentView();
+    } else {
+        window.elementSdk = { config: defaultConfig, setConfig: () => {} };
+        renderCurrentView();
     }
+    } catch (err) {
+      console.error('Fallo elementSdk.init, uso fallback:', err);
+      window.elementSdk = { config: defaultConfig, setConfig: () => {} };
+      renderCurrentView();
+    }
+  }
 
     function initializeMap(routeId) {
       const route = sampleRoutes.find(r => r.id === routeId);
