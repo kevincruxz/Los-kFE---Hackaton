@@ -26,9 +26,68 @@ app.get('/api/get-prueba', async c => {
 })
 
 app.get('/rutas', async c => {
-  const { results } = await c.env.DB.prepare('SELECT id, nombre, distancia, unidad, estatus FROM Rutas').all()
-  return c.json(results)
-})
+  try {
+    const { results } = await c.env.DB.prepare(
+      'SELECT id, nombre, latitud_actual, longitud_actual, estatus FROM Rutas'
+    ).all();
+
+    const rutas = results.map(ruta => ({
+      id: ruta.id,
+      nombre: ruta.nombre,
+      lat: ruta.latitud_actual,
+      long: ruta.longitud_actual,
+      status: ruta.estatus
+    }));
+
+    return c.json(rutas);
+  } catch (e) {
+    return c.json({ success: false, message: `Error al obtener rutas: ${e.message}` }, 500);
+  }
+});
+
+app.post('/rutas/start', async c => {
+  const { id_ruta, lat, long, unidad } = await c.req.json();
+
+  if (id_ruta === undefined || lat === undefined || long === undefined || unidad === undefined) {
+    return c.json({ success: false, message: 'Campos Faltantes: id_ruta, lat, long, unidad' }, 400);
+  }
+
+  try {
+    const { success } = await c.env.DB.prepare(
+      'UPDATE Rutas SET latitud_actual = ?, longitud_actual = ?, unidad = ?, ultima_actualizacion = DATETIME("now"), estatus = 1 WHERE id = ?'
+    ).bind(lat, long, unidad, id_ruta).run();
+
+    if (success) {
+      return c.json({ success: true, message: 'Viaje iniciado y estado actualizado.' });
+    } else {
+      return c.json({ success: false, message: 'Error al iniciar viaje.' }, 500);
+    }
+  } catch (e) {
+    return c.json({ success: false, message: `Error al iniciar viaje: ${e.message}` }, 500);
+  }
+});
+
+app.post('/rutas/cancel', async c => {
+  const { id_ruta } = await c.req.json();
+
+  if (id_ruta === undefined) {
+    return c.json({ success: false, message: 'Campos Faltantes: id_ruta' }, 400);
+  }
+
+  try {
+    const { success } = await c.env.DB.prepare(
+      'UPDATE Rutas SET unidad = NULL, latitud_actual = NULL, longitud_actual = NULL, ultima_actualizacion = NULL, estatus = 0 WHERE id = ?'
+    ).bind(id_ruta).run();
+
+    if (success) {
+      return c.json({ success: true, message: 'Viaje cancelado y estado actualizado.' });
+    } else {
+      return c.json({ success: false, message: 'Error al cancelar viaje.' }, 500);
+    }
+  } catch (e) {
+    return c.json({ success: false, message: `Error al cancelar viaje: ${e.message}` }, 500);
+  }
+});
 
 app.post('/viajes/start', async c => {
   const { id_ruta, latitud_actual, longitud_actual, capacidad_actual } = await c.req.json();
@@ -37,9 +96,10 @@ app.post('/viajes/start', async c => {
     return c.json({ error: 'Campos Faltantes: id_ruta, latitud_actual, longitud_actual' }, 400);
   }
 
-  const firstStopResult = await c.env.DB.prepare(
-    'SELECT id FROM Paradas WHERE id_ruta = ? ORDER BY orden_parada ASC LIMIT 1'
-  ).bind(id_ruta).first();
+  const [_, firstStopResult] = await Promise.all([
+    c.env.DB.prepare('UPDATE Rutas SET estatus = 1 WHERE id = ?').bind(id_ruta).run(),
+    c.env.DB.prepare('SELECT id FROM Paradas WHERE id_ruta = ? ORDER BY orden_parada ASC LIMIT 1').bind(id_ruta).first()
+  ]);
 
   if (!firstStopResult) {
     return c.json({ error: 'Sin paradas encontradas para la ruta especificada' }, 404);
@@ -52,7 +112,7 @@ app.post('/viajes/start', async c => {
   ).bind(id_ruta, latitud_actual, longitud_actual, capacidad_actual || null, proxima_parada_id).run();
 
   if (!success) {
-    return c.json({ error: 'Fallo al iniciar el viaje' }, 500);
+    return c.json({ error: 'Fallo en iniciar el viaje' }, 500);
   }
 
   const newTripId = meta.last_row_id;
@@ -183,6 +243,29 @@ app.get('/rutas/:id_ruta/paradas', async c => {
   ).bind(id_ruta).all();
 
   return c.json({ paradas });
+});
+
+app.get('/rutas/:id_ruta/location', async c => {
+  const { id_ruta } = c.req.param();
+
+  try {
+    const ruta = await c.env.DB.prepare(
+      'SELECT latitud_actual, longitud_actual, estatus FROM Rutas WHERE id = ?'
+    ).bind(id_ruta).first();
+
+    if (ruta && ruta.latitud_actual !== null && ruta.longitud_actual !== null) {
+      return c.json({
+        id_ruta: parseInt(id_ruta),
+        lat: ruta.latitud_actual,
+        long: ruta.longitud_actual,
+        status: ruta.estatus
+      });
+    } else {
+      return c.json({ success: false, message: 'Ruta no encontrada o sin datos de ubicación.' }, 404);
+    }
+  } catch (e) {
+    return c.json({ success: false, message: `Error al obtener la ubicación: ${e.message}` }, 500);
+  }
 });
 
 export default app

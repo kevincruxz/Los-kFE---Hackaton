@@ -13,7 +13,10 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "hono": "^4.10.4"
+    "@hono/swagger-ui": "^0.5.2",
+    "@hono/zod-openapi": "^0.14.4",
+    "hono": "^4.10.4",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "wrangler": "^4.45.4"

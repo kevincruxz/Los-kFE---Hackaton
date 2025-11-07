@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bus Tracker — Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <link rel="icon" href="../assets/logo_utc.png">
+  <script>
+    // Cambiar el endpoint si es necesario:
+    // window.API_BASE = 'https://mi-endpoint';
+  </script>
+</head>
+<body class="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+  <header class="bg-white/90 border-b">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold">Panel de Admin / Dispositivo</h1>
+      </div>
+      <a href="../user/index.html" class="btn primary">Volver a Usuario</a>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 py-6">
+    <section class="card p-5">
+      <h2 class="text-xl font-semibold mb-4">Enviar ubicación (desde este dispositivo)</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <label class="block">
+          <span class="block text-sm text-gray-600 mb-1">ID ruta</span>
+          <input id="id_ruta" type="number" placeholder="1" class="w-full border rounded-xl px-3 py-2" />
+        </label>
+        <label class="block">
+          <span class="block text-sm text-gray-600 mb-1">unidad</span>
+          <input id="unidad" type="number" placeholder="101" class="w-full border rounded-xl px-3 py-2" />
+        </label>
+        <div class="flex items-end gap-2">
+          <button id="btn-ping" class="btn ghost">Enviar ubicación</button>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-2 mt-4">
+        <button id="btn-start" class="btn primary">Iniciar tracking en vivo (GPS)</button>
+        <button id="btn-stop" class="btn ghost" disabled>Detener tracking en vivo</button>
+        <button id="btn-cancel" class="btn danger">Cancelar viaje</button>
+      </div>
+
+      <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+        <div class="card p-3">
+          <div class="text-[11px] uppercase tracking-wide text-gray-500">Lat</div>
+          <div id="lat" class="font-semibold">—</div>
+        </div>
+        <div class="card p-3">
+          <div class="text-[11px] uppercase tracking-wide text-gray-500">Long</div>
+          <div id="lng" class="font-semibold">—</div>
+        </div>
+        <div class="card p-3">
+          <div class="text-[11px] uppercase tracking-wide text-gray-500">Envíos</div>
+          <div id="sent" class="font-semibold">0</div>
+        </div>
+        <div class="card p-3">
+          <div class="text-[11px] uppercase tracking-wide text-gray-500">Estado</div>
+          <div id="status" class="font-semibold">—</div>
+        </div>
+      </div>
+
+      <p id="msg" class="mt-3 text-sm text-green-700"></p>
+      <p id="err" class="mt-2 text-sm text-red-600"></p>
+
+      <div class="mt-6">
+        <div id="map" class="map"></div>
+        <p class="text-xs text-gray-500 mt-2">El marcador se coloca donde está tu GPS. Debes usar <strong>HTTPS</strong> o <strong>localhost</strong> para que el navegador permita la ubicación.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="text-center text-xs text-gray-500 pb-6">Leaflet + Hono API • Punto de referencia: Saltillo (25.426,-100.995) y Ramos Arizpe (25.549,-100.947)</footer>
+
+  <script type="module" src="../shared/api.js"></script>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

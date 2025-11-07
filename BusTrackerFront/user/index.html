@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bus Tracker UTC</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="../assets/styles.css">
+  <link rel="icon" href="../assets/logo_utc.png">
+  <script>
+    // Cambia el endpoint si es necesario:
+    // window.API_BASE = 'https://mi-endpoint';
+  </script>
+</head>
+<body class="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+  <header class="bg-white/90 border-b">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold">Bus Tracker</h1>
+        <p class="text-sm text-gray-500">Cobertura: Saltillo & Ramos Arizpe</p>
+      </div>
+      <a href="../admin/index.html" class="btn primary">Ir a Admin</a>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 py-6">
+    <section class="card p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-semibold">Rutas disponibles</h2>
+        <div class="flex items-center gap-3 text-sm">
+          <label class="flex items-center gap-2">
+            <input id="toggle-all" type="checkbox" class="w-4 h-4">
+            <span>Mostrar también inactivas</span>
+          </label>
+          <button id="btn-refresh" class="btn ghost">Actualizar</button>
+
+        </div>
+      </div>
+      <div id="routes-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </section>
+
+    <section class="mt-6">
+      <div id="maps-host" class="grid grid-cols-1 gap-6"></div>
+    </section>
+  </main>
+
+  <footer class="text-center text-xs text-gray-500 pb-6">Leaflet + Hono API • Punto de referencia: Saltillo (25.426,-100.995) y Ramos Arizpe (25.549,-100.947)</footer>
+
+  <script type="module" src="../shared/api.js"></script>
+  <script type="module">
+    import { apiGet, REF_POINTS, REF_BOUNDS } from '../shared/api.js'
+    import './user.js'
+    // Exponer referencias para otros scripts si hiciera falta
+    window.REF_POINTS = REF_POINTS
+    window.REF_BOUNDS = REF_BOUNDS
+  </script>
+</body>
+</html>
